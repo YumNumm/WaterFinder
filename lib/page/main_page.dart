@@ -10,8 +10,6 @@ class MainPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mapState = ref.watch(mapStateNotifier);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Water Finder'),
@@ -24,9 +22,21 @@ class MainPage extends HookConsumerWidget {
                   .pushNamedAndRemoveUntil('/login', (route) => false);
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              ref.read(mapStateNotifier.notifier).addMarker(
+                    Marker(
+                      point: LatLng(35, 135),
+                      builder: (context) => const Text('A'),
+                    ),
+                  );
+              ref.read(mapStateNotifier.notifier).clearMarker();
+            },
+          ),
         ],
       ),
-      body: FlutterMapWidget(mapController: mapState.mapController),
+      body: const FlutterMapWidget(),
     );
   }
 }
@@ -34,10 +44,7 @@ class MainPage extends HookConsumerWidget {
 class FlutterMapWidget extends StatefulHookConsumerWidget {
   const FlutterMapWidget({
     super.key,
-    required this.mapController,
   });
-
-  final MapController mapController;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -48,9 +55,11 @@ class _FlutterMapWidgetState extends ConsumerState<FlutterMapWidget>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    final mapState = ref.watch(mapStateNotifier);
+
     super.build(context);
     return FlutterMap(
-      mapController: widget.mapController,
+      mapController: mapState.mapController,
       options: MapOptions(
         center: LatLng(35, 135),
         zoom: 8,
@@ -61,11 +70,13 @@ class _FlutterMapWidgetState extends ConsumerState<FlutterMapWidget>
           subdomains: ['a', 'b', 'c'],
           tileProvider: NetworkTileProvider(),
         ),
+        MarkerLayerOptions(
+          markers: mapState.markers,
+        )
       ],
     );
   }
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 }

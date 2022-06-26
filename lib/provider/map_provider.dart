@@ -62,6 +62,11 @@ class MapStateNotifier extends StateNotifier<MapModel> {
       location = null;
     }
   }
+
+  void addMarker(Marker marker) =>
+      state = state.copyWith(markers: [...state.markers, marker]);
+
+  void clearMarker() => state = state.copyWith(markers: []);
 }
 
 final mapStateNotifier =

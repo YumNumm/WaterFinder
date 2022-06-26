@@ -1,4 +1,4 @@
-package com.yumnumm.waterfinder
+package com.example.waterfinder
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -37,6 +37,10 @@ Future<void> main() async {
           '/main': (context) => const MainPage(),
         },
         initialRoute: '/',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.blueAccent,
+        ),
       ),
     ),
   );

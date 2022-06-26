@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase/supabase.dart';
+import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:waterfinder/page/login_page.dart';
-import 'package:waterfinder/page/main_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -20,33 +18,27 @@ class _SplashPageState extends SupabaseAuthState<SplashPage> {
 
   @override
   void onAuthenticated(Session session) {
+    Logger().i('uid: ${session.user?.id}');
+
     if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute<void>(builder: (context) => const MainPage()),
-        (route) => false,
-      );
+      Navigator.of(context).pushReplacementNamed('/main');
     }
   }
 
   @override
   void onErrorAuthenticating(String message) {
-    // TODO: implement onErrorAuthenticating
+    // TODO(YumNumm): implement onErrorAuthenticating
   }
 
   @override
   void onPasswordRecovery(Session session) {
-    // TODO: implement onPasswordRecovery
+    // TODO(YumNumm): implement onPasswordRecovery
   }
 
   @override
   void onUnauthenticated() {
     if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute<void>(builder: (context) => const LoginPage()),
-        (route) => false,
-      );
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 }

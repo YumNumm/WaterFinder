@@ -22,7 +22,6 @@ class MapStateNotifier extends StateNotifier<MapModel> {
   final Logger logger = Logger();
 
   Future<void> initLocationService() async {
-
     await locationService.changeSettings();
 
     LocationData? location;
@@ -67,8 +66,13 @@ class MapStateNotifier extends StateNotifier<MapModel> {
   void addMarker(Marker marker) =>
       state = state.copyWith(markers: [...state.markers, marker]);
 
+  void updateAllMarker(List<Marker> markers) =>
+      state = state.copyWith(markers: [...markers]);
+
   void clearMarker() => state = state.copyWith(markers: []);
 
+  void switchLiveUpdate() =>
+      state = state.copyWith(liveUpdate: !state.liveUpdate);
 }
 
 final mapStateNotifier =

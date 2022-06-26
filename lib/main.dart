@@ -8,6 +8,8 @@ import 'package:waterfinder/page/splash.dart';
 import 'package:waterfinder/private/key.dart';
 import 'package:waterfinder/provider/supabase_provider.dart';
 
+import 'page/main_page.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
@@ -29,12 +31,12 @@ Future<void> main() async {
       child: MaterialApp(
         title: 'Water Finder',
         locale: const Locale('en', 'EN'),
-        home: const SplashPage(),
         routes: {
-          '/splash': (context) => const SplashPage(),
+          '/': (context) => const SplashPage(),
           '/login': (context) => const LoginPage(),
+          '/main': (context) => const MainPage(),
         },
-        initialRoute: '/splash',
+        initialRoute: '/',
       ),
     ),
   );

@@ -14,12 +14,12 @@ final supabaseProvider = Provider<sb.Supabase>((ref) {
 
 class SupabaseStateNotifier extends StateNotifier<SupabaseModel> {
   SupabaseStateNotifier(this.supabase)
-      : super(SupabaseModel(supabase: supabase));
+      : super(SupabaseModel(supabase: supabase, user: null));
   final sb.Supabase supabase;
 
   final Logger logger = Logger();
 
-  
+ 
   Future<void> signInWithGoogle() async {
     final res = await supabase.client.auth.signIn(
       provider: sb.Provider.google,
@@ -39,6 +39,20 @@ class SupabaseStateNotifier extends StateNotifier<SupabaseModel> {
         mode: LaunchMode.externalApplication,
       );
     }
+  }
+
+  Future<void> signOut() async {
+    final res = await supabase.client.auth.signOut();
+    if (res.error != null) {
+      logger.w('Error signing out: ${res.error!.message}');
+      throw Exception(res.error!.message);
+    } else {
+      logger.i('Signed out');
+    }
+  }
+
+  Future<sb.User?> getCurrentUser() async {
+    return supabase.client.auth.currentUser;
   }
 }
 

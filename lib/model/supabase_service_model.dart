@@ -7,5 +7,6 @@ part 'supabase_service_model.freezed.dart';
 class SupabaseModel with _$SupabaseModel {
   const factory SupabaseModel({
     required Supabase supabase,
+    required User? user,
   }) = _SupabaseModel;
 }

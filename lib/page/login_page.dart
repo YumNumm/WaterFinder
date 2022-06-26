@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../provider/supabase_provider.dart';
@@ -12,6 +13,8 @@ class LoginPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
+    final isProcessing = useState<bool>(false);
+
     return Scaffold(
       body: Container(
         height: size.height,
@@ -61,18 +64,25 @@ class LoginPage extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    FloatingActionButton.extended(
-                      onPressed: () {
-                        ref.read(supabaseStateNotifier.notifier).signInWithGoogle();
-                      },
-                      label: const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                    if (!isProcessing.value)
+                      FloatingActionButton.extended(
+                        onPressed: () {
+                          isProcessing.value = true;
+                          ref
+                              .read(supabaseStateNotifier.notifier)
+                              .signInWithGoogle();
+                          isProcessing.value = false;
+                        },
+                        label: const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ),
+                      )
+                    else
+                      const CircularProgressIndicator.adaptive(),
                   ],
                 ),
               ),

@@ -18,13 +18,18 @@ dependencies:
   cupertino_icons: ^1.0.2
   logger: ^1.1.0
   supabase_flutter: ^0.3.1+3
-  mapbox_gl: ^0.16.0
+  mapbox_gl:
+    git:
+      url: https://github.com/Sipioteo/maps_3_0_0.git
   supabase: ^0.3.4+1
   flutter_hooks: ^0.18.5+1
   hooks_riverpod: ^1.0.4
   freezed_annotation: ^2.0.3
   animated_text_kit: ^4.2.2
-  
+  json_serializable: ^6.2.0
+  location: ^4.4.0
+  flutter_map: ^1.1.1
+
 
 dev_dependencies:
   flutter_test:

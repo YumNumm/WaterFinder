@@ -61,6 +61,7 @@ class MapStateNotifier extends StateNotifier<MapModel> {
       logger.i(e.toString());
       location = null;
     }
+
   }
 
   void addMarker(Marker marker) =>
@@ -73,6 +74,8 @@ class MapStateNotifier extends StateNotifier<MapModel> {
 
   void switchLiveUpdate() =>
       state = state.copyWith(liveUpdate: !state.liveUpdate);
+
+
 }
 
 final mapStateNotifier =

@@ -1,12 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:latlong2/latlong.dart' as latlong;
+import 'package:latlong2/latlong.dart';
 import 'package:waterfinder/provider/map_provider.dart';
 import 'package:waterfinder/provider/supabase_provider.dart';
 import 'package:waterfinder/schema/category.dart';
+import 'package:waterfinder/schema/spot.dart';
 
 class MainPage extends HookConsumerWidget {
   const MainPage({super.key});
@@ -50,7 +52,7 @@ class MainPage extends HookConsumerWidget {
             onPressed: () {
               ref.read(mapStateNotifier.notifier).addMarker(
                     Marker(
-                      point: latlong.LatLng(35, 135),
+                      point: LatLng(35, 135),
                       builder: (context) => const Text('A'),
                     ),
                   );
@@ -89,20 +91,20 @@ class Fabwidgets extends HookConsumerWidget {
             for (final spot in spots) {
               markers.add(
                 Marker(
-                  point: latlong.LatLng(spot.lat, spot.lon),
+                  point: LatLng(spot.lat, spot.lon),
                   builder: (context) => GestureDetector(
                     onTap: () {
                       final category = categories.firstWhere(
-                        (e) => int.tryParse(e.id) == spot.categoryId,
+                        (e) => e.id == spot.categoryId,
                         orElse: () => const Category(
-                          id: '-1',
+                          id: -1,
                           name: 'Unknown',
                         ),
                       );
                       showDialog<void>(
                         context: context,
                         builder: (context) => SimpleDialog(
-                          title: const Text('Water Spot'),
+                          title: const Text('Water Spot Information'),
                           children: [
                             Text('Name: ${spot.title}'),
                             Text('Description: ${spot.describe}'),
@@ -166,18 +168,30 @@ class FlutterMapWidget extends HookConsumerWidget {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(mapStateNotifier.notifier).initLocationService();
+      // Start Tap position Stream
     });
 
     return FlutterMap(
       mapController: mapState.mapController,
       options: MapOptions(
-        center: latlong.LatLng(35, 135),
+        center: LatLng(35, 135),
         zoom: 8,
         interactiveFlags: InteractiveFlag.pinchMove |
             InteractiveFlag.pinchZoom |
             InteractiveFlag.drag |
             InteractiveFlag.doubleTapZoom |
             InteractiveFlag.flingAnimation,
+        onLongPress: (position, point) {
+          // Show input Form
+          showDialog<void>(
+            context: context,
+            builder: (ctx) => SpotDataInputDialog(
+              latlong: point,
+            ),
+          );
+
+          // ref.read(supabaseStateNotifier.notifier).addSpot();
+        },
       ),
       layers: [
         TileLayerOptions(
@@ -192,7 +206,7 @@ class FlutterMapWidget extends HookConsumerWidget {
         MarkerLayerOptions(
           markers: [
             Marker(
-              point: latlong.LatLng(
+              point: LatLng(
                 mapState.currentLocation?.latitude ?? 0,
                 mapState.currentLocation?.longitude ?? 0,
               ),
@@ -206,6 +220,89 @@ class FlutterMapWidget extends HookConsumerWidget {
           source: 'OpenStreetMap',
           onSourceTapped: () {},
           alignment: Alignment.bottomLeft,
+        ),
+      ],
+    );
+  }
+}
+
+class SpotDataInputDialog extends HookConsumerWidget {
+  const SpotDataInputDialog({
+    required this.latlong,
+    super.key,
+  });
+
+  final LatLng latlong;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final titleState = useState('');
+    final descriptionState = useState('');
+
+    return AlertDialog(
+      title: const Text('Add Water Spot'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            onChanged: (str) => titleState.value = str,
+            decoration: const InputDecoration(
+              labelText: 'Title',
+            ),
+          ),
+          TextFormField(
+            onChanged: (str) => descriptionState.value = str,
+            decoration: const InputDecoration(
+              labelText: 'Description',
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.cancel),
+          label: const Text('Cancel'),
+        ),
+        TextButton.icon(
+          onPressed: () async {
+            await showGeneralDialog(
+              context: context,
+              barrierDismissible: false,
+              transitionDuration: Duration.zero, // これを入れると遅延を入れなくて
+              barrierColor: Colors.black.withOpacity(0.5),
+              pageBuilder: (
+                BuildContext context,
+                _,
+                __,
+              ) {
+                return const Center(
+                  child: CircularProgressIndicator.adaptive(),
+                );
+              },
+            );
+            await ref.read(supabaseStateNotifier.notifier).addSpot(
+                  Spot(
+                    id: 0,
+                    categoryId: 1,
+                    title: titleState.value,
+                    describe: descriptionState.value,
+                    lat: latlong.latitude,
+                    lon: latlong.longitude,
+                    pictureUrl: null,
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                    createdUserId:
+                        ref.read(supabaseStateNotifier).user?.id ?? '',
+                  ),
+                );
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.send),
+          label: const Text('ADD'),
         ),
       ],
     );

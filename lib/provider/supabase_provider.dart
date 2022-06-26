@@ -92,6 +92,17 @@ class SupabaseStateNotifier extends StateNotifier<SupabaseModel> {
     }
   }
 
+  Future<void> addSpot(Spot spot)async{
+    final res = await supabase.client.from('spot').insert(spot.toJson()).execute();
+    final error = res.error;
+    if (error != null) {
+      logger.w('Error adding spot: $error');
+      throw Exception(error);
+    } else {
+      logger.i('Added spot');
+    }
+  }
+
   sb.User? getCurrentUser() {
     state = state.copyWith(user: supabase.client.auth.currentUser);
     return state.user;

@@ -22,16 +22,20 @@ class MainPage extends HookConsumerWidget {
                   .pushNamedAndRemoveUntil('/login', (route) => false);
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              ref.read(mapStateNotifier.notifier).addMarker(
-                    Marker(
-                      point: LatLng(35, 135),
-                      builder: (context) => const Text('A'),
-                    ),
-                  );
-              ref.read(mapStateNotifier.notifier).clearMarker();
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  ref.read(mapStateNotifier.notifier).addMarker(
+                        Marker(
+                          point: LatLng(35, 135),
+                          builder: (context) => const Text('A'),
+                        ),
+                      );
+                  //ref.read(mapStateNotifier.notifier).clearMarker();
+                },
+              );
             },
           ),
         ],
@@ -41,23 +45,17 @@ class MainPage extends HookConsumerWidget {
   }
 }
 
-class FlutterMapWidget extends StatefulHookConsumerWidget {
-  const FlutterMapWidget({
-    super.key,
-  });
+class FlutterMapWidget extends HookConsumerWidget {
+  const FlutterMapWidget({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _FlutterMapWidgetState();
-}
-
-class _FlutterMapWidgetState extends ConsumerState<FlutterMapWidget>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final mapState = ref.watch(mapStateNotifier);
 
-    super.build(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(mapStateNotifier.notifier).initLocationService();
+    });
+
     return FlutterMap(
       mapController: mapState.mapController,
       options: MapOptions(
@@ -74,9 +72,12 @@ class _FlutterMapWidgetState extends ConsumerState<FlutterMapWidget>
           markers: mapState.markers,
         )
       ],
+      nonRotatedChildren: [
+        AttributionWidget.defaultWidget(
+          source: 'OpenStreetMap contributors',
+          onSourceTapped: () {},
+        ),
+      ],
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

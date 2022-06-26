@@ -2,18 +2,27 @@ import 'dart:ui';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' as rpd;
+import 'package:logger/logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:waterfinder/page/main_page.dart';
 
 import '../provider/supabase_provider.dart';
 
-class LoginPage extends HookConsumerWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends SupabaseAuthState<LoginPage> {
+  @override
+  Widget build(
+    BuildContext context,
+  ) {
     final size = MediaQuery.of(context).size;
-    final isProcessing = useState<bool>(false);
+    const isProcessing = false;
 
     return Scaffold(
       body: Container(
@@ -64,30 +73,72 @@ class LoginPage extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    if (!isProcessing.value)
-                      FloatingActionButton.extended(
-                        onPressed: () {
-                          isProcessing.value = true;
-                          ref
-                              .read(supabaseStateNotifier.notifier)
-                              .signInWithGoogle();
-                          isProcessing.value = false;
-                        },
-                        label: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    else
-                      const CircularProgressIndicator.adaptive(),
+                    const _LoginButton()
                   ],
                 ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    startAuthObserver();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    stopAuthObserver();
+    super.dispose();
+  }
+
+  @override
+  void onAuthenticated(Session session) {
+    Logger().i('OK Successfully authenticated');
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil<void>(
+        MaterialPageRoute(builder: (context) => const MainPage()),
+        (route) => false,
+      );
+    }
+  }
+
+  @override
+  void onErrorAuthenticating(String message) {
+    // TODO: implement onErrorAuthenticating
+  }
+
+  @override
+  void onPasswordRecovery(Session session) {
+    // TODO: implement onPasswordRecovery
+  }
+
+  @override
+  void onUnauthenticated() {
+    // TODO: implement onUnauthenticated
+  }
+}
+
+class _LoginButton extends rpd.HookConsumerWidget {
+  const _LoginButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, rpd.WidgetRef ref) {
+    return FloatingActionButton.extended(
+      onPressed: () async {
+        await ref.read(supabaseStateNotifier.notifier).signInWithGoogle();
+      },
+      label: const Text(
+        'Login',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

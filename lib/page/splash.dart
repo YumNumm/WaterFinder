@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:waterfinder/components/auth_state.dart';
+import 'package:supabase/supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:waterfinder/page/login_page.dart';
+import 'package:waterfinder/page/main_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -8,7 +11,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends AuthState<SplashPage> {
+class _SplashPageState extends SupabaseAuthState<SplashPage> {
   @override
   void initState() {
     recoverSupabaseSession();
@@ -16,9 +19,34 @@ class _SplashPageState extends AuthState<SplashPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator.adaptive()),
-    );
+  void onAuthenticated(Session session) {
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute<void>(builder: (context) => const MainPage()),
+        (route) => false,
+      );
+    }
+  }
+
+  @override
+  void onErrorAuthenticating(String message) {
+    // TODO: implement onErrorAuthenticating
+  }
+
+  @override
+  void onPasswordRecovery(Session session) {
+    // TODO: implement onPasswordRecovery
+  }
+
+  @override
+  void onUnauthenticated() {
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute<void>(builder: (context) => const LoginPage()),
+        (route) => false,
+      );
+    }
   }
 }

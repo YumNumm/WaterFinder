@@ -4,6 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthState<T extends StatefulWidget> extends SupabaseAuthState<T> {
   final Logger logger = Logger();
+
+
+
   @override
   void onUnauthenticated() {
     logger.i('Unauthenticated');

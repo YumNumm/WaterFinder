@@ -1,15 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:waterfinder/page/login_page.dart';
 import 'package:waterfinder/page/splash.dart';
+import 'package:waterfinder/private/key.dart';
 import 'package:waterfinder/provider/supabase_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, // transparent status bar
+    ),
+  );
   final supabase = await Supabase.initialize(
-    url: '[YOUR_SUPABASE_URL]',
-    anonKey: '[YOUR_SUPABASE_ANON_KEY]',
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
+    debug: kDebugMode,
+    authCallbackUrlHostname: 'login-callback',
   );
   runApp(
     ProviderScope(
@@ -19,9 +29,10 @@ Future<void> main() async {
       child: MaterialApp(
         title: 'Water Finder',
         locale: const Locale('en', 'EN'),
-        home: SplashPage(),
+        home: const SplashPage(),
         routes: {
-          '/splash': (context) => SplashPage(),
+          '/splash': (context) => const SplashPage(),
+          '/login': (context) => const LoginPage(),
         },
         initialRoute: '/splash',
       ),

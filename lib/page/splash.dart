@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:waterfinder/components/auth_state.dart';
-import 'package:waterfinder/provider/supabase_provider.dart';
 
 class SplashPage extends StatefulWidget {
-  SplashPage({Key? key}) : super(key: key);
+  const SplashPage({super.key});
 
   @override
   State<SplashPage> createState() => _SplashPageState();
@@ -12,7 +10,15 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends AuthState<SplashPage> {
   @override
+  void initState() {
+    recoverSupabaseSession();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container();
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator.adaptive()),
+    );
   }
 }
